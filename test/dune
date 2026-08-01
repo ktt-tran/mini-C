@@ -1,3 +1,0 @@
-(test
- (name test_mini_C)
- (libraries mini_C))

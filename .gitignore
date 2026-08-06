@@ -1,4 +1,8 @@
 bin/interface.ml
+src/
+src/lexical/
+src/syntax/
+src/util/
 src/evaluator/
 src/typecheck/
 src/compiler/

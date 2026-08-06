@@ -1,0 +1,10 @@
+open Mini_C_mod
+open Mini_C_mod.Eval
+open Mini_C_mod.Lexer
+open Mini_C_mod.Parser
+open Mini_C_mod.SmallCTypes
+open Mini_C_mod.TokenTypes
+open Mini_C_mod.Typecheck
+open Mini_C_mod.Stackmachine_utils
+open Mini_C_mod.Stackmachine
+open Mini_C_mod.Utils

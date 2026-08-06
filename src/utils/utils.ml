@@ -1,4 +1,4 @@
-open SmallCTypes
+open MiniCTypes
 open TokenTypes
 
 (**********************************
@@ -43,7 +43,6 @@ let tokenize_from_file (filename : string) : token list =
   close_in c;
   s
 
-
 (**********************************
  *        Evaluator Utils         *
  **********************************)
@@ -83,7 +82,22 @@ let read_from_file (input_filename : string) : string =
   (* Read the file into lines *)
   let prog_lines = read_lines input_filename in
   (* Compress to a single string *)
-  List.fold_left (fun a e -> a ^ e) "" prog_lines
+  List.fold_left (fun a e -> a ^ "\n" ^ e) "" prog_lines
+
+let parse s =
+  let lexbuf = Lexing.from_string s in
+  let ast = Parser.prog Lexer.token lexbuf in
+  ast
+
+let parse_expr s =
+  let lexbuf = Lexing.from_string s in
+  Parser.parse_expr Lexer.token lexbuf
+
+let parse_stmt s =
+  let lexbuf = Lexing.from_string s in
+  Parser.parse_stmt Lexer.token lexbuf
+
+let parse_defs s = parse s
 
 (* Unparser *)
 (* these pretty printers kinda suck *)
@@ -95,24 +109,24 @@ let unparse_data_type = function
 let unparse_expr = show_expr
 
 let rec unparse_stmt (s : stmt) : string = match s with
-  | NoOp -> "NoOp"
-  | Seq(s1, s2) -> "Seq(" ^ unparse_stmt s1 ^ ", " ^ unparse_stmt s2 ^ ")"
   | Declare(t, id) -> "Declare(" ^ unparse_data_type t ^ ", " ^ id ^ ")"
   | Assign(id, e) -> "Assign(" ^ id ^ ", " ^ unparse_expr e ^ ")"
   | If(guard, if_body, else_body) ->
-    "If(" ^ unparse_expr guard ^ ", " ^ unparse_stmt if_body ^ ", " ^ unparse_stmt else_body ^ ")"
-  | While(guard, body) -> "While(" ^ unparse_expr guard ^ ", " ^ unparse_stmt body ^ ")"
-  | For(id, start_expr, end_expr, body) -> "For(" ^ id ^ " from " ^ unparse_expr start_expr ^ " to " ^ unparse_expr end_expr ^ "){" ^ unparse_stmt body ^ "}"
+    "If(" ^ unparse_expr guard ^ ", [" ^ String.concat "; " (List.map unparse_stmt if_body) ^ "], [" ^ String.concat "; " (List.map unparse_stmt else_body) ^ "])"
+  | While(guard, body) -> "While(" ^ unparse_expr guard ^ ", [" ^ String.concat "; " (List.map unparse_stmt body) ^ "])"
+  | For(id, start_expr, end_expr, body) -> "For(" ^ id ^ " from " ^ unparse_expr start_expr ^ " to " ^ unparse_expr end_expr ^ "){" ^ String.concat "; " (List.map unparse_stmt body) ^ "}"
   | Print(e) -> "Print(" ^ unparse_expr e ^ ")"
   | Return(e) -> "Return(" ^ unparse_expr e ^")"
 
+let unparse_stmts stmts = "[" ^ String.concat "; " (List.map unparse_stmt stmts) ^ "]"
+
 let rec unparse_defn = function
-| Multi(d, d') -> unparse_defn d ^ "\n" ^ unparse_defn d'
-| Fun(rt, id, params, body) -> 
+| Defns ds -> String.concat "\n" (List.map unparse_defn ds)
+| Fun { ret_type = rt; name = id; params; body } ->
   unparse_data_type rt ^ " " ^ id ^ " " ^ "("
-  ^ ListLabels.fold_right ~f:(fun (n, _) a -> ", " ^ n ^ a) params ~init:"" 
-  ^ ") {\n" ^ unparse_stmt body ^ "\n}"
-| Main(body) -> "int main() {\n" ^ unparse_stmt body ^ "\n}"
+  ^ ListLabels.fold_right ~f:(fun (n, _) a -> ", " ^ n ^ a) params ~init:""
+  ^ ") {\n" ^ unparse_stmts body ^ "\n}"
+| Main body -> "int main() {\n" ^ unparse_stmts body ^ "\n}"
 
 (* Removes shadowed bindings from an execution environment *)
 let prune_env env =

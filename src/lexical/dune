@@ -1,0 +1,7 @@
+(library
+ (name lexical))
+
+(ocamllex 
+ (modules lexer))
+
+(include_subdirs no)

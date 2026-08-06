@@ -1,0 +1,11 @@
+lib: [
+  "_build/install/default/lib/mini-C/META"
+  "_build/install/default/lib/mini-C/dune-package"
+  "_build/install/default/lib/mini-C/opam"
+]
+bin: [
+  "_build/install/default/bin/mini-C"
+]
+doc: [
+  "_build/install/default/doc/mini-C/README.md"
+]

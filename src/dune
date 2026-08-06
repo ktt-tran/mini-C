@@ -1,0 +1,14 @@
+(library
+ (name mini_C_mod)
+ (modules miniCTypes tokenTypes utils lexer parser eval typecheck stackmachine stackmachine_utils)
+ (libraries lexical re)
+ (preprocess
+  (pps ppx_jane ppx_deriving.show)))
+
+(ocamllex
+  (modules lexer))
+
+(menhir
+ (modules parser))
+ 
+(include_subdirs unqualified)

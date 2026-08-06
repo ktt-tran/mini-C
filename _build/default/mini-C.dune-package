@@ -1,0 +1,4 @@
+(lang dune 3.21)
+(name mini-C)
+(sections (lib .) (bin ../../bin) (doc ../../doc/mini-C))
+(files (lib (META dune-package opam)) (bin (mini-C)) (doc (README.md)))
